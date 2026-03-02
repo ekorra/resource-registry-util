@@ -1,6 +1,6 @@
 import type { ResourceSearch, ServiceResource } from "@/types/resource";
 
-const BASE_URL = "/resourceregistry/api/v1";
+const BASE_URL = "/api/resourceregistry/api/v1";
 
 export async function getResourceList(): Promise<ServiceResource[]> {
   const response = await fetch(`${BASE_URL}/resource/resourcelist`, {

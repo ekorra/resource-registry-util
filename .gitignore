@@ -25,3 +25,7 @@ dist-ssr
 
 # Claude Code session data
 .claude
+
+# Azure Functions
+api/node_modules
+api/local.settings.json
