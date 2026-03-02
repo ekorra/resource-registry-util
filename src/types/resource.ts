@@ -93,6 +93,7 @@ export interface ResourceSearch {
   description?: string;
   resourceType?: ResourceType;
   keyword?: string;
+  statuses?: string[];
   includeExpired?: boolean;
 }
 

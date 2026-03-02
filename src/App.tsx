@@ -39,6 +39,9 @@ function applyFilters(
       );
       if (!matches) return false;
     }
+    if (filters.statuses && filters.statuses.length > 0) {
+      if (!r.status || !filters.statuses.includes(r.status)) return false;
+    }
     return true;
   });
 }
@@ -97,6 +100,10 @@ export default function App() {
     }
   }
 
+  const availableStatuses = [...new Set(
+    allResources.map((r) => r.status).filter((s): s is string => !!s)
+  )].sort();
+
   const filtered = applyFilters(allResources, filters);
   const sorted = sortResources(filtered, sortField, sortDirection);
 
@@ -112,7 +119,11 @@ export default function App() {
       </header>
 
       <main className="px-6 py-5 space-y-4 max-w-screen-2xl mx-auto">
-        <FilterBar filters={filters} onChange={setFilters} />
+        <FilterBar
+          filters={filters}
+          onChange={setFilters}
+          availableStatuses={availableStatuses}
+        />
 
         {!loading && !error && (
           <p className="text-sm text-muted-foreground">
