@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getResourceList, type AltinnEnv } from "@/api/resourceRegistry";
 import { FilterBar } from "@/components/FilterBar";
 import { ResourceTable } from "@/components/ResourceTable";
+import { translations } from "@/i18n";
 import type {
   Language,
   ResourceSearch,
@@ -141,11 +142,6 @@ function loadLang(): Language {
   return stored === "nn" ? "nn" : stored === "en" ? "en" : "nb";
 }
 
-const ENV_LABELS: Record<AltinnEnv, string> = {
-  prod: "Production",
-  tt02: "Test (TT02)",
-};
-
 const LANG_LABELS: Record<Language, string> = {
   nb: "NB",
   nn: "NN",
@@ -206,16 +202,17 @@ export default function App() {
 
   const filtered = applyFilters(allResources, filters);
   const sorted = sortResources(filtered, sortField, sortDirection, lang);
+  const t = translations[lang];
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card px-6 py-4 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">
-            Altinn Resource Registry
+            {t.appTitle}
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Browse and filter registered service resources
+            {t.appSubtitle}
           </p>
         </div>
 
@@ -247,7 +244,7 @@ export default function App() {
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
-                {ENV_LABELS[e]}
+                {e === "prod" ? t.envProd : t.envTT02}
               </button>
             ))}
           </div>
@@ -259,12 +256,12 @@ export default function App() {
           filters={filters}
           onChange={handleFilterChange}
           availableStatuses={availableStatuses}
+          t={t}
         />
 
         {!loading && !error && (
           <p className="text-sm text-muted-foreground">
-            {sorted.length} of {allResources.length} resource
-            {allResources.length !== 1 ? "s" : ""}
+            {t.resourceCount(sorted.length, allResources.length)}
           </p>
         )}
 
@@ -276,6 +273,7 @@ export default function App() {
           sortDirection={sortDirection}
           onSort={handleSort}
           language={lang}
+          t={t}
         />
       </main>
     </div>

@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Translations } from "@/i18n";
 import { ResourceType, type ResourceSearch } from "@/types/resource";
 import { ChevronDown } from "lucide-react";
 
@@ -19,22 +20,14 @@ interface FilterBarProps {
   filters: ResourceSearch;
   onChange: (filters: ResourceSearch) => void;
   availableStatuses: string[];
+  t: Translations;
 }
-
-const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
-  [ResourceType.Default]: "Default",
-  [ResourceType.Systemresource]: "Systemresource",
-  [ResourceType.MaskinportenSchema]: "MaskinportenSchema",
-  [ResourceType.GenericAccessResource]: "Generic Access Resource",
-  [ResourceType.CorrespondenceService]: "Correspondence Service",
-  [ResourceType.BrokerService]: "Broker Service",
-  [ResourceType.Consent]: "Consent",
-};
 
 export function FilterBar({
   filters,
   onChange,
   availableStatuses,
+  t,
 }: FilterBarProps) {
   function update(patch: Partial<ResourceSearch>) {
     onChange({ ...filters, ...patch });
@@ -51,22 +44,22 @@ export function FilterBar({
   const selectedStatuses = filters.statuses ?? [];
   const statusLabel =
     selectedStatuses.length === 0
-      ? "All statuses"
+      ? t.allStatuses
       : selectedStatuses.length === 1
         ? selectedStatuses[0]
-        : `${selectedStatuses.length} statuses`;
+        : t.statusesSelected(selectedStatuses.length);
 
   return (
     <div className="flex flex-wrap gap-3 items-center p-4 bg-card border rounded-lg">
       <Input
-        placeholder="Filter by title..."
+        placeholder={t.filterTitle}
         value={filters.title ?? ""}
         onChange={(e) => update({ title: e.target.value || undefined })}
         className="w-56"
       />
 
       <Input
-        placeholder="Filter by authority..."
+        placeholder={t.filterAuthority}
         value={filters.authority ?? ""}
         onChange={(e) => update({ authority: e.target.value || undefined })}
         className="w-56"
@@ -82,13 +75,13 @@ export function FilterBar({
         }
       >
         <SelectTrigger className="w-52">
-          <SelectValue placeholder="Resource type" />
+          <SelectValue placeholder={t.allTypes} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__all__">All types</SelectItem>
-          {Object.values(ResourceType).map((t) => (
-            <SelectItem key={t} value={t}>
-              {RESOURCE_TYPE_LABELS[t]}
+          <SelectItem value="__all__">{t.allTypes}</SelectItem>
+          {Object.values(ResourceType).map((type) => (
+            <SelectItem key={type} value={type}>
+              {t.resourceTypeLabels[type]}
             </SelectItem>
           ))}
         </SelectContent>
@@ -110,7 +103,7 @@ export function FilterBar({
         <PopoverContent className="w-48 p-2" align="start">
           {availableStatuses.length === 0 ? (
             <p className="px-2 py-1.5 text-sm text-muted-foreground">
-              Loading...
+              {t.loadingStatuses}
             </p>
           ) : (
             <ul className="space-y-1">
@@ -132,7 +125,7 @@ export function FilterBar({
               onClick={() => update({ statuses: undefined })}
               className="mt-2 w-full rounded px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted text-left"
             >
-              Clear selection
+              {t.clearSelection}
             </button>
           )}
         </PopoverContent>
@@ -145,7 +138,7 @@ export function FilterBar({
           onChange={(e) => update({ includeExpired: e.target.checked })}
           className="h-4 w-4 rounded border-input"
         />
-        Include expired
+        {t.includeExpired}
       </label>
     </div>
   );

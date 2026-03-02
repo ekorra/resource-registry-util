@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { Translations } from "@/i18n";
 import {
   ResourceType,
   type Language,
@@ -25,6 +26,7 @@ interface ResourceTableProps {
   sortDirection: SortDirection;
   onSort: (field: SortField) => void;
   language: Language;
+  t: Translations;
 }
 
 const RESOURCE_TYPE_COLORS: Record<ResourceType, string> = {
@@ -107,11 +109,12 @@ export function ResourceTable({
   sortDirection,
   onSort,
   language,
+  t,
 }: ResourceTableProps) {
   if (error) {
     return (
       <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive text-sm">
-        Failed to load resources: {error}
+        {t.loadError} {error}
       </div>
     );
   }
@@ -121,24 +124,24 @@ export function ResourceTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Title</TableHead>
+            <TableHead>{t.colTitle}</TableHead>
             <SortHeader
               field="resourceType"
-              label="Type"
+              label={t.colType}
               current={sortField}
               direction={sortDirection}
               onSort={onSort}
             />
             <SortHeader
               field="status"
-              label="Status"
+              label={t.colStatus}
               current={sortField}
               direction={sortDirection}
               onSort={onSort}
             />
             <SortHeader
               field="authority"
-              label="Authority"
+              label={t.colAuthority}
               current={sortField}
               direction={sortDirection}
               onSort={onSort}
@@ -162,7 +165,7 @@ export function ResourceTable({
                 colSpan={COLUMN_COUNT}
                 className="text-center text-muted-foreground py-10"
               >
-                No resources found.
+                {t.noResources}
               </TableCell>
             </TableRow>
           ) : (
@@ -176,7 +179,7 @@ export function ResourceTable({
                     <span
                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${RESOURCE_TYPE_COLORS[r.resourceType] ?? "bg-gray-100 text-gray-700"}`}
                     >
-                      {r.resourceType}
+                      {t.resourceTypeLabels[r.resourceType] ?? r.resourceType}
                     </span>
                   ) : (
                     <Badge variant="outline">—</Badge>
