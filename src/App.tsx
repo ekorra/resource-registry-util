@@ -42,6 +42,16 @@ function applyFilters(
     if (filters.statuses && filters.statuses.length > 0) {
       if (!r.status || !filters.statuses.includes(r.status)) return false;
     }
+    if (filters.authority) {
+      const q = filters.authority.toLowerCase();
+      const auth = r.hasCompetentAuthority;
+      const names = Object.values(auth?.name ?? {});
+      const matches =
+        names.some((n) => n.toLowerCase().includes(q)) ||
+        auth?.orgcode?.toLowerCase().includes(q) ||
+        auth?.organization?.toLowerCase().includes(q);
+      if (!matches) return false;
+    }
     return true;
   });
 }

@@ -95,6 +95,7 @@ export interface ResourceSearch {
   resourceType?: ResourceType;
   keyword?: string;
   statuses?: string[];
+  authority?: string;
   includeExpired?: boolean;
 }
 

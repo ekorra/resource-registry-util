@@ -65,6 +65,13 @@ export function FilterBar({
         className="w-56"
       />
 
+      <Input
+        placeholder="Filter by authority..."
+        value={filters.authority ?? ""}
+        onChange={(e) => update({ authority: e.target.value || undefined })}
+        className="w-56"
+      />
+
       <Select
         value={filters.resourceType ?? "__all__"}
         onValueChange={(v) =>
