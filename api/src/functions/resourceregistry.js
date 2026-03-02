@@ -1,17 +1,27 @@
 const { app } = require("@azure/functions");
 
-const ALTINN_BASE = "https://platform.altinn.no";
+const ENV_BASES = {
+  prod: "https://platform.altinn.no",
+  tt02: "https://platform.tt02.altinn.no",
+};
 
 app.http("resourceregistry", {
   methods: ["GET"],
-  route: "resourceregistry/{*restOfPath}",
+  route: "{env}/resourceregistry/{*restOfPath}",
   authLevel: "anonymous",
   handler: async (request, context) => {
+    const env = request.params.env;
+    const base = ENV_BASES[env];
+
+    if (!base) {
+      return { status: 400, body: `Unknown environment: ${env}` };
+    }
+
     const restOfPath = request.params.restOfPath ?? "";
     const search = new URL(request.url).search;
-    const targetUrl = `${ALTINN_BASE}/resourceregistry/${restOfPath}${search}`;
+    const targetUrl = `${base}/resourceregistry/${restOfPath}${search}`;
 
-    context.log(`Proxying: ${targetUrl}`);
+    context.log(`Proxying [${env}]: ${targetUrl}`);
 
     const response = await fetch(targetUrl, {
       headers: { Accept: "application/json" },

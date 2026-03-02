@@ -13,10 +13,15 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api/resourceregistry": {
+      "/api/prod/resourceregistry": {
         target: "https://platform.altinn.no",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        rewrite: (path) => path.replace(/^\/api\/prod/, ""),
+      },
+      "/api/tt02/resourceregistry": {
+        target: "https://platform.tt02.altinn.no",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/tt02/, ""),
       },
     },
   },

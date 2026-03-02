@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getResourceList } from "@/api/resourceRegistry";
+import { getResourceList, type AltinnEnv } from "@/api/resourceRegistry";
 import { FilterBar } from "@/components/FilterBar";
 import { ResourceTable } from "@/components/ResourceTable";
 import type {
@@ -75,6 +75,7 @@ function sortResources(
 }
 
 const FILTERS_STORAGE_KEY = "rr-filters";
+const ENV_STORAGE_KEY = "rr-env";
 
 function loadFilters(): ResourceSearch {
   try {
@@ -85,7 +86,18 @@ function loadFilters(): ResourceSearch {
   }
 }
 
+function loadEnv(): AltinnEnv {
+  const stored = localStorage.getItem(ENV_STORAGE_KEY);
+  return stored === "tt02" ? "tt02" : "prod";
+}
+
+const ENV_LABELS: Record<AltinnEnv, string> = {
+  prod: "Production",
+  tt02: "Test (TT02)",
+};
+
 export default function App() {
+  const [env, setEnv] = useState<AltinnEnv>(loadEnv);
   const [allResources, setAllResources] = useState<ServiceResource[]>([]);
   const [filters, setFilters] = useState<ResourceSearch>(loadFilters);
   const [loading, setLoading] = useState(true);
@@ -94,13 +106,21 @@ export default function App() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   useEffect(() => {
-    getResourceList()
+    setAllResources([]);
+    setLoading(true);
+    setError(undefined);
+    getResourceList(env)
       .then(setAllResources)
       .catch((err) =>
         setError(err instanceof Error ? err.message : "Unknown error")
       )
       .finally(() => setLoading(false));
-  }, []);
+  }, [env]);
+
+  function handleEnvChange(next: AltinnEnv) {
+    localStorage.setItem(ENV_STORAGE_KEY, next);
+    setEnv(next);
+  }
 
   function handleFilterChange(next: ResourceSearch) {
     setFilters(next);
@@ -116,22 +136,42 @@ export default function App() {
     }
   }
 
-  const availableStatuses = [...new Set(
-    allResources.map((r) => r.status).filter((s): s is string => !!s)
-  )].sort();
+  const availableStatuses = [
+    ...new Set(
+      allResources.map((r) => r.status).filter((s): s is string => !!s)
+    ),
+  ].sort();
 
   const filtered = applyFilters(allResources, filters);
   const sorted = sortResources(filtered, sortField, sortDirection);
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card px-6 py-4">
-        <h1 className="text-xl font-semibold tracking-tight">
-          Altinn Resource Registry
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Browse and filter registered service resources
-        </p>
+      <header className="border-b bg-card px-6 py-4 flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">
+            Altinn Resource Registry
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Browse and filter registered service resources
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1 rounded-lg border p-1 text-sm shrink-0">
+          {(["prod", "tt02"] as AltinnEnv[]).map((e) => (
+            <button
+              key={e}
+              onClick={() => handleEnvChange(e)}
+              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+                env === e
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              {ENV_LABELS[e]}
+            </button>
+          ))}
+        </div>
       </header>
 
       <main className="px-6 py-5 space-y-4 max-w-screen-2xl mx-auto">

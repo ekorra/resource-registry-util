@@ -1,35 +1,15 @@
-import type { ResourceSearch, ServiceResource } from "@/types/resource";
+import type { ServiceResource } from "@/types/resource";
 
-const BASE_URL = "/api/resourceregistry/api/v1";
+export type AltinnEnv = "prod" | "tt02";
 
-export async function getResourceList(): Promise<ServiceResource[]> {
-  const response = await fetch(`${BASE_URL}/resource/resourcelist`, {
-    headers: { Accept: "application/json" },
-  });
-
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
-
-  return response.json() as Promise<ServiceResource[]>;
+function baseUrl(env: AltinnEnv) {
+  return `/api/${env}/resourceregistry/api/v1`;
 }
 
-export async function searchResources(
-  params: ResourceSearch
+export async function getResourceList(
+  env: AltinnEnv
 ): Promise<ServiceResource[]> {
-  const query = new URLSearchParams();
-
-  if (params.id) query.set("Id", params.id);
-  if (params.title) query.set("Title", params.title);
-  if (params.description) query.set("Description", params.description);
-  if (params.resourceType) query.set("ResourceType", params.resourceType);
-  if (params.keyword) query.set("Keyword", params.keyword);
-  if (params.includeExpired) query.set("IncludeExpired", "true");
-
-  const qs = query.toString();
-  const url = `${BASE_URL}/resource/Search${qs ? `?${qs}` : ""}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${baseUrl(env)}/resource/resourcelist`, {
     headers: { Accept: "application/json" },
   });
 
@@ -40,8 +20,11 @@ export async function searchResources(
   return response.json() as Promise<ServiceResource[]>;
 }
 
-export async function getResource(id: string): Promise<ServiceResource> {
-  const response = await fetch(`${BASE_URL}/resource/${id}`, {
+export async function getResource(
+  id: string,
+  env: AltinnEnv
+): Promise<ServiceResource> {
+  const response = await fetch(`${baseUrl(env)}/resource/${id}`, {
     headers: { Accept: "application/json" },
   });
 
