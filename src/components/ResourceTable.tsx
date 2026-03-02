@@ -26,15 +26,15 @@ interface ResourceTableProps {
 }
 
 const RESOURCE_TYPE_COLORS: Record<ResourceType, string> = {
-  [ResourceType.Default]: "bg-gray-100 text-gray-800",
+  [ResourceType.Default]: "bg-gray-100 text-gray-700",
   [ResourceType.Systemresource]: "bg-blue-100 text-blue-800",
   [ResourceType.MaskinportenSchema]: "bg-purple-100 text-purple-800",
+  [ResourceType.GenericAccessResource]: "bg-green-100 text-green-800",
+  [ResourceType.CorrespondenceService]: "bg-orange-100 text-orange-800",
+  [ResourceType.BrokerService]: "bg-teal-100 text-teal-800",
 };
 
-function formatDate(dateStr?: string): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("nb-NO");
-}
+const COLUMN_COUNT = 7;
 
 function getTitle(resource: ServiceResource): string {
   if (!resource.title) return resource.identifier;
@@ -51,7 +51,9 @@ function getAuthority(resource: ServiceResource): string {
   const auth = resource.hasCompetentAuthority;
   if (!auth) return "—";
   const name =
-    auth.name?.["nb"] ?? auth.name?.["en"] ?? Object.values(auth.name ?? {})[0];
+    auth.name?.["nb"] ??
+    auth.name?.["en"] ??
+    Object.values(auth.name ?? {})[0];
   return name ?? auth.orgcode ?? auth.organization ?? "—";
 }
 
@@ -63,7 +65,13 @@ interface SortHeaderProps {
   onSort: (field: SortField) => void;
 }
 
-function SortHeader({ field, label, current, direction, onSort }: SortHeaderProps) {
+function SortHeader({
+  field,
+  label,
+  current,
+  direction,
+  onSort,
+}: SortHeaderProps) {
   const active = current === field;
   const Icon = active
     ? direction === "asc"
@@ -78,7 +86,9 @@ function SortHeader({ field, label, current, direction, onSort }: SortHeaderProp
     >
       <span className="flex items-center gap-1">
         {label}
-        <Icon className={`h-3.5 w-3.5 ${active ? "opacity-100" : "opacity-40"}`} />
+        <Icon
+          className={`h-3.5 w-3.5 ${active ? "opacity-100" : "opacity-40"}`}
+        />
       </span>
     </TableHead>
   );
@@ -129,22 +139,15 @@ export function ResourceTable({
             />
             <TableHead>Authority</TableHead>
             <SortHeader
-              field="validFrom"
-              label="Valid From"
+              field="delegable"
+              label="Delegable"
               current={sortField}
               direction={sortDirection}
               onSort={onSort}
             />
             <SortHeader
-              field="validTo"
-              label="Valid To"
-              current={sortField}
-              direction={sortDirection}
-              onSort={onSort}
-            />
-            <SortHeader
-              field="isPublicService"
-              label="Public"
+              field="versionId"
+              label="Version"
               current={sortField}
               direction={sortDirection}
               onSort={onSort}
@@ -155,7 +158,7 @@ export function ResourceTable({
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
               <TableRow key={i}>
-                {Array.from({ length: 8 }).map((_, j) => (
+                {Array.from({ length: COLUMN_COUNT }).map((_, j) => (
                   <TableCell key={j}>
                     <Skeleton className="h-4 w-full" />
                   </TableCell>
@@ -164,19 +167,26 @@ export function ResourceTable({
             ))
           ) : resources.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground py-10">
+              <TableCell
+                colSpan={COLUMN_COUNT}
+                className="text-center text-muted-foreground py-10"
+              >
                 No resources found.
               </TableCell>
             </TableRow>
           ) : (
             resources.map((r) => (
               <TableRow key={r.identifier} className="hover:bg-muted/30">
-                <TableCell className="font-mono text-xs">{r.identifier}</TableCell>
-                <TableCell className="max-w-xs truncate">{getTitle(r)}</TableCell>
+                <TableCell className="font-mono text-xs max-w-48 truncate">
+                  {r.identifier}
+                </TableCell>
+                <TableCell className="max-w-xs truncate">
+                  {getTitle(r)}
+                </TableCell>
                 <TableCell>
                   {r.resourceType ? (
                     <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${RESOURCE_TYPE_COLORS[r.resourceType]}`}
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${RESOURCE_TYPE_COLORS[r.resourceType] ?? "bg-gray-100 text-gray-700"}`}
                     >
                       {r.resourceType}
                     </span>
@@ -184,28 +194,19 @@ export function ResourceTable({
                     <Badge variant="outline">—</Badge>
                   )}
                 </TableCell>
-                <TableCell>
-                  {r.status ? (
-                    <span className="text-sm">{r.status}</span>
-                  ) : (
-                    "—"
-                  )}
-                </TableCell>
+                <TableCell className="text-sm">{r.status ?? "—"}</TableCell>
                 <TableCell className="text-sm">{getAuthority(r)}</TableCell>
-                <TableCell className="text-sm tabular-nums">
-                  {formatDate(r.validFrom)}
-                </TableCell>
-                <TableCell className="text-sm tabular-nums">
-                  {formatDate(r.validTo)}
-                </TableCell>
-                <TableCell>
-                  {r.isPublicService === true ? (
-                    <span className="text-green-600 font-medium text-sm">Yes</span>
-                  ) : r.isPublicService === false ? (
-                    <span className="text-muted-foreground text-sm">No</span>
+                <TableCell className="text-sm">
+                  {r.delegable === true ? (
+                    <span className="text-green-600 font-medium">Yes</span>
+                  ) : r.delegable === false ? (
+                    <span className="text-muted-foreground">No</span>
                   ) : (
                     "—"
                   )}
+                </TableCell>
+                <TableCell className="text-sm tabular-nums text-muted-foreground">
+                  {r.versionId ?? "—"}
                 </TableCell>
               </TableRow>
             ))

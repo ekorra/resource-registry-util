@@ -2,6 +2,9 @@ export enum ResourceType {
   Default = "Default",
   Systemresource = "Systemresource",
   MaskinportenSchema = "MaskinportenSchema",
+  GenericAccessResource = "GenericAccessResource",
+  CorrespondenceService = "CorrespondenceService",
+  BrokerService = "BrokerService",
 }
 
 export enum ReferenceSource {
@@ -38,8 +41,22 @@ export interface ResourceReference {
   referenceType: ReferenceType;
 }
 
+export interface ContactPoint {
+  category?: string;
+  email?: string;
+  telephone?: string;
+  contactPage?: string;
+}
+
+export interface AuthorizationReference {
+  id: string;
+  value: string;
+}
+
 export interface ServiceResource {
   identifier: string;
+  version?: string;
+  versionId?: number;
   title?: Record<string, string>;
   description?: Record<string, string>;
   rightDescription?: Record<string, string>;
@@ -50,15 +67,24 @@ export interface ServiceResource {
   isPartOf?: string;
   isPublicService?: boolean;
   thematicArea?: string;
+  thematicAreas?: string[];
   resourceReferences?: ResourceReference[];
+  contactPoints?: ContactPoint[];
+  authorizationReference?: AuthorizationReference[];
   isComplete?: boolean;
   delegable?: boolean;
   visible?: boolean;
   hasCompetentAuthority?: CompetentAuthority;
   keywords?: Keyword[];
   sector?: string[];
+  spatial?: string[];
+  availableForType?: string[];
   resourceType?: ResourceType;
   mainLanguage?: string;
+  accessListMode?: string;
+  selfIdentifiedUserEnabled?: boolean;
+  enterpriseUserEnabled?: boolean;
+  isOneTimeConsent?: boolean;
 }
 
 export interface ResourceSearch {
@@ -75,9 +101,9 @@ export type SortField = keyof Pick<
   | "identifier"
   | "status"
   | "resourceType"
-  | "validFrom"
-  | "validTo"
-  | "isPublicService"
+  | "versionId"
+  | "delegable"
+  | "visible"
 >;
 
 export type SortDirection = "asc" | "desc";

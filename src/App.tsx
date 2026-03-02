@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { searchResources } from "@/api/resourceRegistry";
+import { useEffect, useState } from "react";
+import { getResourceList } from "@/api/resourceRegistry";
 import { FilterBar } from "@/components/FilterBar";
 import { ResourceTable } from "@/components/ResourceTable";
 import type {
@@ -8,6 +8,40 @@ import type {
   SortDirection,
   SortField,
 } from "@/types/resource";
+
+function applyFilters(
+  resources: ServiceResource[],
+  filters: ResourceSearch
+): ServiceResource[] {
+  return resources.filter((r) => {
+    if (filters.id) {
+      if (!r.identifier.toLowerCase().includes(filters.id.toLowerCase())) {
+        return false;
+      }
+    }
+    if (filters.title) {
+      const q = filters.title.toLowerCase();
+      const titles = Object.values(r.title ?? {});
+      if (!titles.some((t) => t.toLowerCase().includes(q))) return false;
+    }
+    if (filters.description) {
+      const q = filters.description.toLowerCase();
+      const descs = Object.values(r.description ?? {});
+      if (!descs.some((d) => d.toLowerCase().includes(q))) return false;
+    }
+    if (filters.resourceType && r.resourceType !== filters.resourceType) {
+      return false;
+    }
+    if (filters.keyword) {
+      const q = filters.keyword.toLowerCase();
+      const matches = (r.keywords ?? []).some((k) =>
+        k.word.toLowerCase().includes(q)
+      );
+      if (!matches) return false;
+    }
+    return true;
+  });
+}
 
 function sortResources(
   resources: ServiceResource[],
@@ -38,37 +72,21 @@ function sortResources(
 }
 
 export default function App() {
+  const [allResources, setAllResources] = useState<ServiceResource[]>([]);
   const [filters, setFilters] = useState<ResourceSearch>({});
-  const [resources, setResources] = useState<ServiceResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const fetchResources = useCallback(async (params: ResourceSearch) => {
-    setLoading(true);
-    setError(undefined);
-    try {
-      const data = await searchResources(params);
-      setResources(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      fetchResources(filters);
-    }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [filters, fetchResources]);
+    getResourceList()
+      .then(setAllResources)
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : "Unknown error")
+      )
+      .finally(() => setLoading(false));
+  }, []);
 
   function handleSort(field: SortField) {
     if (sortField === field) {
@@ -79,7 +97,8 @@ export default function App() {
     }
   }
 
-  const sorted = sortResources(resources, sortField, sortDirection);
+  const filtered = applyFilters(allResources, filters);
+  const sorted = sortResources(filtered, sortField, sortDirection);
 
   return (
     <div className="min-h-screen bg-background">
@@ -97,7 +116,8 @@ export default function App() {
 
         {!loading && !error && (
           <p className="text-sm text-muted-foreground">
-            {sorted.length} resource{sorted.length !== 1 ? "s" : ""}
+            {sorted.length} of {allResources.length} resource
+            {allResources.length !== 1 ? "s" : ""}
           </p>
         )}
 

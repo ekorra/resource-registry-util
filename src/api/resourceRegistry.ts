@@ -2,6 +2,18 @@ import type { ResourceSearch, ServiceResource } from "@/types/resource";
 
 const BASE_URL = "/resourceregistry/api/v1";
 
+export async function getResourceList(): Promise<ServiceResource[]> {
+  const response = await fetch(`${BASE_URL}/resource/resourcelist`, {
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json() as Promise<ServiceResource[]>;
+}
+
 export async function searchResources(
   params: ResourceSearch
 ): Promise<ServiceResource[]> {

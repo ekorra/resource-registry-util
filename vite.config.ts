@@ -14,7 +14,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/resourceregistry": {
-        target: "http://localhost:5100",
+        target: "https://platform.altinn.no",
         changeOrigin: true,
       },
     },
