@@ -98,9 +98,6 @@ export interface ResourceSearch {
   includeExpired?: boolean;
 }
 
-export type SortField = keyof Pick<
-  ServiceResource,
-  "status" | "resourceType"
->;
+export type SortField = "status" | "resourceType" | "authority";
 
 export type SortDirection = "asc" | "desc";

@@ -131,7 +131,13 @@ export function ResourceTable({
               direction={sortDirection}
               onSort={onSort}
             />
-            <TableHead>Authority</TableHead>
+            <SortHeader
+              field="authority"
+              label="Authority"
+              current={sortField}
+              direction={sortDirection}
+              onSort={onSort}
+            />
           </TableRow>
         </TableHeader>
         <TableBody>

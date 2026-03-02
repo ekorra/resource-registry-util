@@ -46,6 +46,33 @@ function applyFilters(
   });
 }
 
+function getTitle(resource: ServiceResource): string {
+  if (!resource.title) return resource.identifier;
+  return (
+    resource.title["nb"] ??
+    resource.title["nn"] ??
+    resource.title["en"] ??
+    Object.values(resource.title)[0] ??
+    resource.identifier
+  );
+}
+
+function getSortValue(
+  resource: ServiceResource,
+  field: SortField
+): string | boolean | null | undefined {
+  if (field === "authority") {
+    const auth = resource.hasCompetentAuthority;
+    if (!auth) return null;
+    const name =
+      auth.name?.["nb"] ??
+      auth.name?.["en"] ??
+      Object.values(auth.name ?? {})[0];
+    return name ?? auth.orgcode ?? auth.organization ?? null;
+  }
+  return resource[field];
+}
+
 function sortResources(
   resources: ServiceResource[],
   field: SortField | null,
@@ -54,15 +81,14 @@ function sortResources(
   if (!field) return resources;
 
   return [...resources].sort((a, b) => {
-    const av = a[field];
-    const bv = b[field];
-
-    if (av == null && bv == null) return 0;
-    if (av == null) return 1;
-    if (bv == null) return -1;
+    const av = getSortValue(a, field);
+    const bv = getSortValue(b, field);
 
     let cmp = 0;
-    if (typeof av === "string" && typeof bv === "string") {
+    if (av == null && bv == null) cmp = 0;
+    else if (av == null) cmp = 1;
+    else if (bv == null) cmp = -1;
+    else if (typeof av === "string" && typeof bv === "string") {
       cmp = av.localeCompare(bv);
     } else if (typeof av === "boolean" && typeof bv === "boolean") {
       cmp = av === bv ? 0 : av ? -1 : 1;
@@ -70,7 +96,8 @@ function sortResources(
       cmp = av < bv ? -1 : av > bv ? 1 : 0;
     }
 
-    return direction === "asc" ? cmp : -cmp;
+    if (cmp !== 0) return direction === "asc" ? cmp : -cmp;
+    return getTitle(a).localeCompare(getTitle(b));
   });
 }
 
