@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import {
   ResourceType,
+  type Language,
   type ServiceResource,
   type SortDirection,
   type SortField,
@@ -23,6 +24,7 @@ interface ResourceTableProps {
   sortField: SortField | null;
   sortDirection: SortDirection;
   onSort: (field: SortField) => void;
+  language: Language;
 }
 
 const RESOURCE_TYPE_COLORS: Record<ResourceType, string> = {
@@ -37,25 +39,27 @@ const RESOURCE_TYPE_COLORS: Record<ResourceType, string> = {
 
 const COLUMN_COUNT = 4;
 
-function getTitle(resource: ServiceResource): string {
-  if (!resource.title) return resource.identifier;
-  return (
-    resource.title["nb"] ??
-    resource.title["nn"] ??
-    resource.title["en"] ??
-    Object.values(resource.title)[0] ??
-    resource.identifier
-  );
+function localized(
+  dict: Record<string, string> | undefined,
+  lang: Language
+): string | undefined {
+  if (!dict) return undefined;
+  const order: Language[] =
+    lang === "en" ? ["en", "nb", "nn"] : lang === "nn" ? ["nn", "nb", "en"] : ["nb", "nn", "en"];
+  for (const l of order) {
+    if (dict[l]) return dict[l];
+  }
+  return Object.values(dict)[0];
 }
 
-function getAuthority(resource: ServiceResource): string {
+function getTitle(resource: ServiceResource, lang: Language): string {
+  return localized(resource.title, lang) ?? resource.identifier;
+}
+
+function getAuthority(resource: ServiceResource, lang: Language): string {
   const auth = resource.hasCompetentAuthority;
   if (!auth) return "—";
-  const name =
-    auth.name?.["nb"] ??
-    auth.name?.["en"] ??
-    Object.values(auth.name ?? {})[0];
-  return name ?? auth.orgcode ?? auth.organization ?? "—";
+  return localized(auth.name, lang) ?? auth.orgcode ?? auth.organization ?? "—";
 }
 
 interface SortHeaderProps {
@@ -102,6 +106,7 @@ export function ResourceTable({
   sortField,
   sortDirection,
   onSort,
+  language,
 }: ResourceTableProps) {
   if (error) {
     return (
@@ -164,7 +169,7 @@ export function ResourceTable({
             resources.map((r) => (
               <TableRow key={r.identifier} className="hover:bg-muted/30">
                 <TableCell className="max-w-xs truncate">
-                  {getTitle(r)}
+                  {getTitle(r, language)}
                 </TableCell>
                 <TableCell>
                   {r.resourceType ? (
@@ -178,7 +183,7 @@ export function ResourceTable({
                   )}
                 </TableCell>
                 <TableCell className="text-sm">{r.status ?? "—"}</TableCell>
-                <TableCell className="text-sm">{getAuthority(r)}</TableCell>
+                <TableCell className="text-sm">{getAuthority(r, language)}</TableCell>
               </TableRow>
             ))
           )}

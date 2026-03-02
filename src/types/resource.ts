@@ -102,3 +102,5 @@ export interface ResourceSearch {
 export type SortField = "status" | "resourceType" | "authority";
 
 export type SortDirection = "asc" | "desc";
+
+export type Language = "nb" | "nn" | "en";

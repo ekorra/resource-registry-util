@@ -3,6 +3,7 @@ import { getResourceList, type AltinnEnv } from "@/api/resourceRegistry";
 import { FilterBar } from "@/components/FilterBar";
 import { ResourceTable } from "@/components/ResourceTable";
 import type {
+  Language,
   ResourceSearch,
   ServiceResource,
   SortDirection,
@@ -56,29 +57,34 @@ function applyFilters(
   });
 }
 
-function getTitle(resource: ServiceResource): string {
-  if (!resource.title) return resource.identifier;
-  return (
-    resource.title["nb"] ??
-    resource.title["nn"] ??
-    resource.title["en"] ??
-    Object.values(resource.title)[0] ??
-    resource.identifier
-  );
+function localized(
+  dict: Record<string, string> | undefined,
+  lang: Language
+): string | undefined {
+  if (!dict) return undefined;
+  const order: Language[] =
+    lang === "en" ? ["en", "nb", "nn"] : lang === "nn" ? ["nn", "nb", "en"] : ["nb", "nn", "en"];
+  for (const l of order) {
+    if (dict[l]) return dict[l];
+  }
+  return Object.values(dict)[0];
+}
+
+function getTitle(resource: ServiceResource, lang: Language): string {
+  return localized(resource.title, lang) ?? resource.identifier;
 }
 
 function getSortValue(
   resource: ServiceResource,
-  field: SortField
+  field: SortField,
+  lang: Language
 ): string | boolean | null | undefined {
   if (field === "authority") {
     const auth = resource.hasCompetentAuthority;
     if (!auth) return null;
-    const name =
-      auth.name?.["nb"] ??
-      auth.name?.["en"] ??
-      Object.values(auth.name ?? {})[0];
-    return name ?? auth.orgcode ?? auth.organization ?? null;
+    return (
+      localized(auth.name, lang) ?? auth.orgcode ?? auth.organization ?? null
+    );
   }
   return resource[field];
 }
@@ -86,13 +92,14 @@ function getSortValue(
 function sortResources(
   resources: ServiceResource[],
   field: SortField | null,
-  direction: SortDirection
+  direction: SortDirection,
+  lang: Language
 ): ServiceResource[] {
   if (!field) return resources;
 
   return [...resources].sort((a, b) => {
-    const av = getSortValue(a, field);
-    const bv = getSortValue(b, field);
+    const av = getSortValue(a, field, lang);
+    const bv = getSortValue(b, field, lang);
 
     let cmp = 0;
     if (av == null && bv == null) cmp = 0;
@@ -107,12 +114,13 @@ function sortResources(
     }
 
     if (cmp !== 0) return direction === "asc" ? cmp : -cmp;
-    return getTitle(a).localeCompare(getTitle(b));
+    return getTitle(a, lang).localeCompare(getTitle(b, lang));
   });
 }
 
 const FILTERS_STORAGE_KEY = "rr-filters";
 const ENV_STORAGE_KEY = "rr-env";
+const LANG_STORAGE_KEY = "rr-lang";
 
 function loadFilters(): ResourceSearch {
   try {
@@ -128,13 +136,25 @@ function loadEnv(): AltinnEnv {
   return stored === "tt02" ? "tt02" : "prod";
 }
 
+function loadLang(): Language {
+  const stored = localStorage.getItem(LANG_STORAGE_KEY);
+  return stored === "nn" ? "nn" : stored === "en" ? "en" : "nb";
+}
+
 const ENV_LABELS: Record<AltinnEnv, string> = {
   prod: "Production",
   tt02: "Test (TT02)",
 };
 
+const LANG_LABELS: Record<Language, string> = {
+  nb: "NB",
+  nn: "NN",
+  en: "EN",
+};
+
 export default function App() {
   const [env, setEnv] = useState<AltinnEnv>(loadEnv);
+  const [lang, setLang] = useState<Language>(loadLang);
   const [allResources, setAllResources] = useState<ServiceResource[]>([]);
   const [filters, setFilters] = useState<ResourceSearch>(loadFilters);
   const [loading, setLoading] = useState(true);
@@ -159,6 +179,11 @@ export default function App() {
     setEnv(next);
   }
 
+  function handleLangChange(next: Language) {
+    localStorage.setItem(LANG_STORAGE_KEY, next);
+    setLang(next);
+  }
+
   function handleFilterChange(next: ResourceSearch) {
     setFilters(next);
     localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(next));
@@ -180,7 +205,7 @@ export default function App() {
   ].sort();
 
   const filtered = applyFilters(allResources, filters);
-  const sorted = sortResources(filtered, sortField, sortDirection);
+  const sorted = sortResources(filtered, sortField, sortDirection, lang);
 
   return (
     <div className="min-h-screen bg-background">
@@ -194,20 +219,38 @@ export default function App() {
           </p>
         </div>
 
-        <div className="flex items-center gap-1 rounded-lg border p-1 text-sm shrink-0">
-          {(["prod", "tt02"] as AltinnEnv[]).map((e) => (
-            <button
-              key={e}
-              onClick={() => handleEnvChange(e)}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-                env === e
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {ENV_LABELS[e]}
-            </button>
-          ))}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1 rounded-lg border p-1 text-sm">
+            {(["nb", "nn", "en"] as Language[]).map((l) => (
+              <button
+                key={l}
+                onClick={() => handleLangChange(l)}
+                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+                  lang === l
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {LANG_LABELS[l]}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-1 rounded-lg border p-1 text-sm">
+            {(["prod", "tt02"] as AltinnEnv[]).map((e) => (
+              <button
+                key={e}
+                onClick={() => handleEnvChange(e)}
+                className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+                  env === e
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {ENV_LABELS[e]}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -232,6 +275,7 @@ export default function App() {
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={handleSort}
+          language={lang}
         />
       </main>
     </div>
