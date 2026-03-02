@@ -25,6 +25,7 @@ interface ResourceTableProps {
   sortField: SortField | null;
   sortDirection: SortDirection;
   onSort: (field: SortField) => void;
+  onResourceClick: (resource: ServiceResource) => void;
   language: Language;
   t: Translations;
 }
@@ -108,6 +109,7 @@ export function ResourceTable({
   sortField,
   sortDirection,
   onSort,
+  onResourceClick,
   language,
   t,
 }: ResourceTableProps) {
@@ -171,8 +173,13 @@ export function ResourceTable({
           ) : (
             resources.map((r) => (
               <TableRow key={r.identifier} className="hover:bg-muted/30">
-                <TableCell className="max-w-xs truncate">
-                  {getTitle(r, language)}
+                <TableCell className="max-w-xs">
+                  <button
+                    onClick={() => onResourceClick(r)}
+                    className="text-left hover:underline truncate block w-full"
+                  >
+                    {getTitle(r, language)}
+                  </button>
                 </TableCell>
                 <TableCell>
                   {r.resourceType ? (

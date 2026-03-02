@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getResourceList, type AltinnEnv } from "@/api/resourceRegistry";
 import { FilterBar } from "@/components/FilterBar";
+import { ResourceDetail } from "@/components/ResourceDetail";
 import { ResourceTable } from "@/components/ResourceTable";
 import { translations } from "@/i18n";
 import type {
@@ -157,6 +158,7 @@ export default function App() {
   const [error, setError] = useState<string | undefined>();
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [selectedResource, setSelectedResource] = useState<ServiceResource | null>(null);
 
   useEffect(() => {
     setAllResources([]);
@@ -272,10 +274,19 @@ export default function App() {
           sortField={sortField}
           sortDirection={sortDirection}
           onSort={handleSort}
+          onResourceClick={setSelectedResource}
           language={lang}
           t={t}
         />
       </main>
+
+      <ResourceDetail
+        resource={selectedResource}
+        open={selectedResource !== null}
+        onClose={() => setSelectedResource(null)}
+        language={lang}
+        t={t}
+      />
     </div>
   );
 }

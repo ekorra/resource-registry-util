@@ -21,6 +21,23 @@ export interface Translations {
   loadError: string;
   resourceCount: (shown: number, total: number) => string;
   resourceTypeLabels: Record<ResourceType, string>;
+  // Detail panel
+  detailHeading: string;
+  fieldIdentifier: string;
+  fieldDescription: string;
+  fieldValidFrom: string;
+  fieldValidTo: string;
+  fieldIsPublicService: string;
+  fieldDelegable: string;
+  fieldVisible: string;
+  fieldMainLanguage: string;
+  fieldHomepage: string;
+  fieldKeywords: string;
+  fieldSector: string;
+  fieldThematicAreas: string;
+  fieldContact: string;
+  yes: string;
+  no: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -54,6 +71,22 @@ export const translations: Record<Language, Translations> = {
       [ResourceType.BrokerService]: "Formidlingstjeneste",
       [ResourceType.Consent]: "Samtykke",
     },
+    detailHeading: "Ressursdetaljer",
+    fieldIdentifier: "Identifikator",
+    fieldDescription: "Beskrivelse",
+    fieldValidFrom: "Gyldig fra",
+    fieldValidTo: "Gyldig til",
+    fieldIsPublicService: "Offentlig tjeneste",
+    fieldDelegable: "Delegerbar",
+    fieldVisible: "Synlig",
+    fieldMainLanguage: "Hovedspråk",
+    fieldHomepage: "Hjemmeside",
+    fieldKeywords: "Nøkkelord",
+    fieldSector: "Sektor",
+    fieldThematicAreas: "Tematiske områder",
+    fieldContact: "Kontakt",
+    yes: "Ja",
+    no: "Nei",
   },
   nn: {
     appTitle: "Altinn ressursregister",
@@ -85,6 +118,22 @@ export const translations: Record<Language, Translations> = {
       [ResourceType.BrokerService]: "Formidlingsteneste",
       [ResourceType.Consent]: "Samtykke",
     },
+    detailHeading: "Ressursdetaljar",
+    fieldIdentifier: "Identifikator",
+    fieldDescription: "Skildring",
+    fieldValidFrom: "Gyldig frå",
+    fieldValidTo: "Gyldig til",
+    fieldIsPublicService: "Offentleg teneste",
+    fieldDelegable: "Delegerbar",
+    fieldVisible: "Synleg",
+    fieldMainLanguage: "Hovudspråk",
+    fieldHomepage: "Heimeside",
+    fieldKeywords: "Nøkkelord",
+    fieldSector: "Sektor",
+    fieldThematicAreas: "Tematiske område",
+    fieldContact: "Kontakt",
+    yes: "Ja",
+    no: "Nei",
   },
   en: {
     appTitle: "Altinn Resource Registry",
@@ -116,5 +165,21 @@ export const translations: Record<Language, Translations> = {
       [ResourceType.BrokerService]: "Broker service",
       [ResourceType.Consent]: "Consent",
     },
+    detailHeading: "Resource details",
+    fieldIdentifier: "Identifier",
+    fieldDescription: "Description",
+    fieldValidFrom: "Valid from",
+    fieldValidTo: "Valid to",
+    fieldIsPublicService: "Public service",
+    fieldDelegable: "Delegable",
+    fieldVisible: "Visible",
+    fieldMainLanguage: "Main language",
+    fieldHomepage: "Homepage",
+    fieldKeywords: "Keywords",
+    fieldSector: "Sector",
+    fieldThematicAreas: "Thematic areas",
+    fieldContact: "Contact",
+    yes: "Yes",
+    no: "No",
   },
 };
