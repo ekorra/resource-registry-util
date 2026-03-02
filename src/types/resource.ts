@@ -5,6 +5,7 @@ export enum ResourceType {
   GenericAccessResource = "GenericAccessResource",
   CorrespondenceService = "CorrespondenceService",
   BrokerService = "BrokerService",
+  Consent = "Consent",
 }
 
 export enum ReferenceSource {

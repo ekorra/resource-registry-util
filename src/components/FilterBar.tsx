@@ -28,6 +28,7 @@ const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
   [ResourceType.GenericAccessResource]: "Generic Access Resource",
   [ResourceType.CorrespondenceService]: "Correspondence Service",
   [ResourceType.BrokerService]: "Broker Service",
+  [ResourceType.Consent]: "Consent",
 };
 
 export function FilterBar({

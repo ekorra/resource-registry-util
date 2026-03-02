@@ -32,6 +32,7 @@ const RESOURCE_TYPE_COLORS: Record<ResourceType, string> = {
   [ResourceType.GenericAccessResource]: "bg-green-100 text-green-800",
   [ResourceType.CorrespondenceService]: "bg-orange-100 text-orange-800",
   [ResourceType.BrokerService]: "bg-teal-100 text-teal-800",
+  [ResourceType.Consent]: "bg-yellow-100 text-yellow-800",
 };
 
 const COLUMN_COUNT = 7;
