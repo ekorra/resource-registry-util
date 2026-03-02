@@ -64,18 +64,7 @@ export function FilterBar({
         onChange={(e) => update({ title: e.target.value || undefined })}
         className="w-56"
       />
-      <Input
-        placeholder="Filter by keyword..."
-        value={filters.keyword ?? ""}
-        onChange={(e) => update({ keyword: e.target.value || undefined })}
-        className="w-48"
-      />
-      <Input
-        placeholder="Filter by ID..."
-        value={filters.id ?? ""}
-        onChange={(e) => update({ id: e.target.value || undefined })}
-        className="w-48"
-      />
+
       <Select
         value={filters.resourceType ?? "__all__"}
         onValueChange={(v) =>

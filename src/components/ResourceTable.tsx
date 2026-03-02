@@ -35,7 +35,7 @@ const RESOURCE_TYPE_COLORS: Record<ResourceType, string> = {
   [ResourceType.Consent]: "bg-yellow-100 text-yellow-800",
 };
 
-const COLUMN_COUNT = 7;
+const COLUMN_COUNT = 4;
 
 function getTitle(resource: ServiceResource): string {
   if (!resource.title) return resource.identifier;
@@ -116,13 +116,6 @@ export function ResourceTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <SortHeader
-              field="identifier"
-              label="Identifier"
-              current={sortField}
-              direction={sortDirection}
-              onSort={onSort}
-            />
             <TableHead>Title</TableHead>
             <SortHeader
               field="resourceType"
@@ -139,20 +132,6 @@ export function ResourceTable({
               onSort={onSort}
             />
             <TableHead>Authority</TableHead>
-            <SortHeader
-              field="delegable"
-              label="Delegable"
-              current={sortField}
-              direction={sortDirection}
-              onSort={onSort}
-            />
-            <SortHeader
-              field="versionId"
-              label="Version"
-              current={sortField}
-              direction={sortDirection}
-              onSort={onSort}
-            />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -178,9 +157,6 @@ export function ResourceTable({
           ) : (
             resources.map((r) => (
               <TableRow key={r.identifier} className="hover:bg-muted/30">
-                <TableCell className="font-mono text-xs max-w-48 truncate">
-                  {r.identifier}
-                </TableCell>
                 <TableCell className="max-w-xs truncate">
                   {getTitle(r)}
                 </TableCell>
@@ -197,18 +173,6 @@ export function ResourceTable({
                 </TableCell>
                 <TableCell className="text-sm">{r.status ?? "—"}</TableCell>
                 <TableCell className="text-sm">{getAuthority(r)}</TableCell>
-                <TableCell className="text-sm">
-                  {r.delegable === true ? (
-                    <span className="text-green-600 font-medium">Yes</span>
-                  ) : r.delegable === false ? (
-                    <span className="text-muted-foreground">No</span>
-                  ) : (
-                    "—"
-                  )}
-                </TableCell>
-                <TableCell className="text-sm tabular-nums text-muted-foreground">
-                  {r.versionId ?? "—"}
-                </TableCell>
               </TableRow>
             ))
           )}

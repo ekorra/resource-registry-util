@@ -100,12 +100,7 @@ export interface ResourceSearch {
 
 export type SortField = keyof Pick<
   ServiceResource,
-  | "identifier"
-  | "status"
-  | "resourceType"
-  | "versionId"
-  | "delegable"
-  | "visible"
+  "status" | "resourceType"
 >;
 
 export type SortDirection = "asc" | "desc";

@@ -74,9 +74,20 @@ function sortResources(
   });
 }
 
+const FILTERS_STORAGE_KEY = "rr-filters";
+
+function loadFilters(): ResourceSearch {
+  try {
+    const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as ResourceSearch) : {};
+  } catch {
+    return {};
+  }
+}
+
 export default function App() {
   const [allResources, setAllResources] = useState<ServiceResource[]>([]);
-  const [filters, setFilters] = useState<ResourceSearch>({});
+  const [filters, setFilters] = useState<ResourceSearch>(loadFilters);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
   const [sortField, setSortField] = useState<SortField | null>(null);
@@ -90,6 +101,11 @@ export default function App() {
       )
       .finally(() => setLoading(false));
   }, []);
+
+  function handleFilterChange(next: ResourceSearch) {
+    setFilters(next);
+    localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(next));
+  }
 
   function handleSort(field: SortField) {
     if (sortField === field) {
@@ -121,7 +137,7 @@ export default function App() {
       <main className="px-6 py-5 space-y-4 max-w-screen-2xl mx-auto">
         <FilterBar
           filters={filters}
-          onChange={setFilters}
+          onChange={handleFilterChange}
           availableStatuses={availableStatuses}
         />
 
