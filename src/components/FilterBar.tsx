@@ -13,10 +13,13 @@ interface FilterBarProps {
   onChange: (filters: ResourceSearch) => void;
 }
 
-const RESOURCE_TYPE_LABELS: Record<string, string> = {
+const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
   [ResourceType.Default]: "Default",
   [ResourceType.Systemresource]: "Systemresource",
   [ResourceType.MaskinportenSchema]: "MaskinportenSchema",
+  [ResourceType.GenericAccessResource]: "Generic Access Resource",
+  [ResourceType.CorrespondenceService]: "Correspondence Service",
+  [ResourceType.BrokerService]: "Broker Service",
 };
 
 export function FilterBar({ filters, onChange }: FilterBarProps) {
